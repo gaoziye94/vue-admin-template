@@ -63,6 +63,7 @@ module.exports = [
         }
       }
 
+      info.company = 704
       return {
         rspCode: 0,
         data: info

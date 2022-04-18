@@ -1,4 +1,4 @@
-<template>
+datasource.vue<template>
   <div class="app-container">
     <el-button @click="insertDict">新增</el-button>
     <el-button @click="deleteDict">删除</el-button>
@@ -20,19 +20,14 @@
           {{ scope.$index }}
         </template>
       </el-table-column>
-      <el-table-column label="字典编码"  align="center" >
+      <el-table-column label="字典名称"  align="center" >
         <template slot-scope="scope">
-          {{ scope.row.dictCode }}
+          {{ scope.row.dictName }}
         </template>
       </el-table-column>
-      <el-table-column label="字典项名称"  align="center">
+      <el-table-column label="字典编码"  align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.itemName }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="提交值"  align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.itemValue }}</span>
+          <span>{{ scope.row.dictCode }}</span>
         </template>
       </el-table-column>
       <el-table-column label="备注"  align="center" >
@@ -62,15 +57,32 @@
           <span>{{ scope.row.updatedTime }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="操作"  align="center">
+        <template slot-scope="scope">
+          <el-button
+            type="text"
+            size="mini"
+            @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-dropdown @command="handleCommand">
+            <span class="el-dropdown-link">
+              更多<i class="el-icon-arrow-down el-icon--right"></i>
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="a" @click.native="handleClick(scope.$index, scope.row)">编辑字典项</el-dropdown-item>
+              <el-dropdown-item command="b">删除</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </template>
+      </el-table-column>
     </el-table>
   </div>
 </template>
 
 <script>
-import { getListPage } from '@/api/dictItem'
+import { getListPage } from '@/api/dict'
 
 export default {
-  name: 'DictItem',
+  name: 'Dict',
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -86,13 +98,41 @@ export default {
       list: null,
       listLoading: true,
       multipleSelection: [],
-      dictCode: this.$route.query.dictCode
+      dictCode: ''
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    handleClick(index, row) {
+      console.log(index, row)
+      this.dictCode = row.dictCode
+    },
+    handleCommand(command) {
+      if ('a' === command) {
+        let that = this
+        setTimeout(function() {
+          that.$router.push({
+            path: '/system/dictItem',
+            query: {
+              dictCode: that.dictCode
+              // project: this.$store.state.user.project
+            }
+          })
+        }, 3)
+      }
+    },
+    // 编辑字典项
+    editItem(val) {
+      this.$router.push({
+        path: '/system/dictItem',
+        query: {
+          dictCode: val.msg.dictCode,
+          project: this.$store.state.user.project
+        }
+      })
+    },
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
@@ -110,7 +150,7 @@ export default {
     },
     fetchData() {
       this.listLoading = true
-      getListPage({ 'dictCode': this.dictCode }).then(response => {
+      getListPage().then(response => {
         this.list = response.data.records
         this.listLoading = false
       })

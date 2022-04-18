@@ -20,24 +20,24 @@
           {{ scope.$index }}
         </template>
       </el-table-column>
-      <el-table-column label="字典编码"  align="center" >
+      <el-table-column label="数据源编码"  align="center" >
         <template slot-scope="scope">
-          {{ scope.row.dictCode }}
+          {{ scope.row.sourceCode }}
         </template>
       </el-table-column>
-      <el-table-column label="字典项名称"  align="center">
+      <el-table-column label="数据源名称"  align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.itemName }}</span>
+          <span>{{ scope.row.sourceName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="提交值"  align="center">
+      <el-table-column label="数据源描述"  align="center" >
         <template slot-scope="scope">
-          <span>{{ scope.row.itemValue }}</span>
+          {{ scope.row.sourceDesc }}
         </template>
       </el-table-column>
-      <el-table-column label="备注"  align="center" >
+      <el-table-column label="数据源类型"  align="center" >
         <template slot-scope="scope">
-          {{ scope.row.remark }}
+          {{ scope.row.sourceType }}
         </template>
       </el-table-column>
       <el-table-column class-name="status-col" label="创建人" align="center">
@@ -62,15 +62,39 @@
           <span>{{ scope.row.updatedTime }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="操作"  align="center">
+        <template slot-scope="scope">
+          <el-button
+            type="text"
+            size="mini"
+            @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-button
+            type="text"
+            size="mini"
+            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
     </el-table>
+
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="page"
+      :page-sizes="[10, 20, 50, 100]"
+      :page-size="pagesize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total">
+    </el-pagination>
+
+
   </div>
 </template>
 
 <script>
-import { getListPage } from '@/api/dictItem'
+import { getListPage } from '@/api/datasource'
 
 export default {
-  name: 'DictItem',
+  name: 'Dict',
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -86,20 +110,45 @@ export default {
       list: null,
       listLoading: true,
       multipleSelection: [],
-      dictCode: this.$route.query.dictCode
+      companyId: this.$store.state.user.company,
+      page: 1,
+      pagesize: 10,
+      total: '',
+      dataSource: {}
+
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`)
+      this.pagesize = val
+      this.fetchData()
+    },
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`)
+      this.page = val
+      this.fetchData()
+    },
+    // 编辑字典项
+    editItem(val) {
+      this.$router.push({
+        path: '/system/dictItem',
+        query: {
+          dictCode: val.msg.dictCode,
+          project: this.$store.state.user.project
+        }
+      })
+    },
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
-    insertDict() {
+    insertDataSource() {
 
     },
-    deleteDict() {
+    deleteDataSource() {
 
     },
     handleEdit(index, row) {
@@ -110,8 +159,9 @@ export default {
     },
     fetchData() {
       this.listLoading = true
-      getListPage({ 'dictCode': this.dictCode }).then(response => {
+      getListPage({ 'companyId': this.companyId, 'page': this.page, 'pagesize': this.pagesize }).then(response => {
         this.list = response.data.records
+        this.total = response.data.total
         this.listLoading = false
       })
     }

@@ -63,14 +63,13 @@
             type="text"
             size="mini"
             @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-dropdown>
+          <el-dropdown @command="handleCommand">
             <span class="el-dropdown-link">
               更多<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>编辑字典项</el-dropdown-item>
-              <el-dropdown-item>刷新字典项</el-dropdown-item>
-              <el-dropdown-item>删除</el-dropdown-item>
+              <el-dropdown-item command="a" @click.native="handleClick(scope.$index, scope.row)">编辑字典项</el-dropdown-item>
+              <el-dropdown-item command="b">删除</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </template>
@@ -98,13 +97,32 @@ export default {
     return {
       list: null,
       listLoading: true,
-      multipleSelection: []
+      multipleSelection: [],
+      dictCode: ''
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    handleClick(index, row) {
+      console.log(index, row)
+      this.dictCode = row.dictCode
+    },
+    handleCommand(command) {
+      if ('a' === command) {
+        let that = this
+        setTimeout(function() {
+          that.$router.push({
+            path: '/system/dictItem',
+            query: {
+              dictCode: that.dictCode
+              // project: this.$store.state.user.project
+            }
+          })
+        }, 3)
+      }
+    },
     // 编辑字典项
     editItem(val) {
       this.$router.push({

@@ -149,6 +149,30 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/report',
+    component: Layout,
+    redirect: '/report/datasource',
+    name: 'report',
+    meta: {
+      title: '报表设计',
+      icon: 'nested'
+    },
+    children: [
+      {
+        path: 'datasource',
+        component: () => import('@/views/report/datasource'), // Parent router-view
+        name: 'datasource',
+        meta: { title: '数据源' }
+      },
+      {
+        path: 'dataSet',
+        component: () => import('@/views/report/dataSet'), // Parent router-view
+        name: 'dataSet',
+        meta: { title: '数据集' }
+      }
+    ]
+  },
+  {
     path: '/system',
     component: Layout,
     redirect: '/system/dict',

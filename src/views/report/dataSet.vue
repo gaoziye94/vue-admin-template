@@ -20,19 +20,29 @@ datasource.vue<template>
           {{ scope.$index }}
         </template>
       </el-table-column>
-      <el-table-column label="字典名称"  align="center" >
+      <el-table-column label="数据集编码"  align="center" >
         <template slot-scope="scope">
-          {{ scope.row.dictName }}
+          {{ scope.row.setCode }}
         </template>
       </el-table-column>
-      <el-table-column label="字典编码"  align="center">
+      <el-table-column label="数据集名称"  align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.dictCode }}</span>
+          <span>{{ scope.row.setName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="备注"  align="center" >
+      <el-table-column label="描述"  align="center" >
         <template slot-scope="scope">
-          {{ scope.row.remark }}
+          {{ scope.row.setDesc }}
+        </template>
+      </el-table-column>
+      <el-table-column label="数据源编码"  align="center" >
+        <template slot-scope="scope">
+          {{ scope.row.sourceCode }}
+        </template>
+      </el-table-column>
+      <el-table-column label="数据集类型"  align="center" >
+        <template slot-scope="scope">
+          {{ scope.row.setType }}
         </template>
       </el-table-column>
       <el-table-column class-name="status-col" label="创建人" align="center">
@@ -63,26 +73,70 @@ datasource.vue<template>
             type="text"
             size="mini"
             @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-dropdown @command="handleCommand">
+          <el-dropdown >
             <span class="el-dropdown-link">
               更多<i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="a" @click.native="handleClick(scope.$index, scope.row)">编辑字典项</el-dropdown-item>
+              <el-dropdown-item command="a" @click.native="handleClick(scope.$index, scope.row)">预览数据</el-dropdown-item>
               <el-dropdown-item command="b">删除</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </template>
       </el-table-column>
     </el-table>
+
+
+    <el-dialog
+      title="编辑数据源"
+      :visible.sync="dialogVisible"
+      :before-close="handleClose">
+<!--        <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">-->
+<!--          <el-form-item label="数据集类型" prop="setType" hidden>-->
+<!--            <el-input v-model="ruleForm.setType"></el-input>-->
+<!--          </el-form-item>-->
+<!--          <el-form-item label="数据集编码" prop="setCode">-->
+<!--            <el-input v-model="ruleForm.setCode"></el-input>-->
+<!--          </el-form-item>-->
+<!--          <el-form-item label="数据集名称" prop="setName">-->
+<!--            <el-input v-model="ruleForm.setName"></el-input>-->
+<!--          </el-form-item>-->
+<!--          <el-form-item label="数据集描述" prop="setDesc">-->
+<!--            <el-input v-model="ruleForm.setDesc"></el-input>-->
+<!--          </el-form-item>-->
+<!--        </el-form>-->
+      <el-form :model="httpForm"  label-width="100px" class="demo-ruleForm">
+        <el-form-item label="请求路径" prop="apiUrl">
+          <el-input placeholder="请输入请求路径" v-model="httpForm.apiUrl" class="input-with-select">
+            <el-select v-model="httpForm.method" slot="prepend" placeholder="请选择" style="width: 100px;">
+              <el-option label="GET" value="GET"></el-option>
+              <el-option label="POST" value="POST"></el-option>
+              <el-option label="PUT" value="PUT"></el-option>
+              <el-option label="DELETE" value="DELETE"></el-option>
+            </el-select>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="请求头" prop="header">
+          <el-input v-model="httpForm.header"></el-input>
+        </el-form-item>
+        <el-form-item label="请求体" prop="body">
+          <el-input v-model="httpForm.body"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+<!--    <el-button @click="dialogVisible = false">取 消</el-button>-->
+<!--    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>-->
+         <el-button type="primary" @click="testTransform">测试数据</el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getListPage } from '@/api/dict'
+import { getListPage, testTransform } from '@/api/dataSet'
 
 export default {
-  name: 'Dict',
+  name: 'DataSet',
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -98,30 +152,52 @@ export default {
       list: null,
       listLoading: true,
       multipleSelection: [],
-      dictCode: ''
+      dictCode: '',
+      dialogVisible: false,
+      input3: '',
+      methodType: '',
+      httpForm: {
+        apiUrl: 'https://www.bdsaas.com/api/companyCase/list?currentPage=1&pageSize=8',
+        method: 'GET',
+        header: '{"Content-Type":"application/json;charset=UTF-8"}',
+        body: ''
+      },
+      ruleForm: {
+        sourceCode: '',
+        setType: 'http',
+        setCode: '',
+        setName: '',
+        setDesc: ''
+      },
+      rules: {
+        setCode: [
+          { required: true, message: '请输入活动名称', trigger: 'blur' },
+          { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        ],
+        setName: [
+          { required: true, message: '请选择活动区域', trigger: 'change' }
+        ]
+      }
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
-    handleClick(index, row) {
-      console.log(index, row)
-      this.dictCode = row.dictCode
+    //测试数据
+    testTransform() {
+      console.log('submit!')
+      testTransform({ 'setType': this.ruleForm.setType,
+        'dynSentence': JSON.stringify(this.httpForm) }).then(response => {
+        console.log(response)
+      })
     },
-    handleCommand(command) {
-      if ('a' === command) {
-        let that = this
-        setTimeout(function() {
-          that.$router.push({
-            path: '/system/dictItem',
-            query: {
-              dictCode: that.dictCode
-              // project: this.$store.state.user.project
-            }
-          })
-        }, 3)
-      }
+    handleClose(done) {
+      this.$confirm('确认关闭？')
+        .then(_ => {
+          done()
+        })
+        .catch(_ => {})
     },
     // 编辑字典项
     editItem(val) {
@@ -137,7 +213,9 @@ export default {
       this.multipleSelection = val
     },
     insertDict() {
-
+      if (this.dialogVisible === false) {
+        this.dialogVisible = true
+      }
     },
     deleteDict() {
 

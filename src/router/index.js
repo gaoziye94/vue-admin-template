@@ -186,20 +186,19 @@ export const constantRoutes = [
         path: 'dict',
         component: () => import('@/views/system/dict'), // Parent router-view
         name: 'dict',
-        meta: { title: '字典' }
+        meta: { title: 'BI大屏-数据源', icon: 'form' }
       },
       {
         path: 'dictItem',
         component: () => import('@/views/system/dictItem'), // Parent router-view
         name: 'dictItem',
-        hidden: true,
-        meta: { title: '字典项' }
+        meta: { title: 'BI大屏-字典项', icon: 'form' }
       },
       {
         path: 'dict1',
         component: () => import('@/views/system/dict1'), // Parent router-view
         name: 'dict1',
-        meta: { title: 'dict1' }
+        meta: { title: 'BI大屏-字典', icon: 'form' }
       }
     ]
   },

@@ -39,7 +39,7 @@ module.exports = {
     before: require('./mock/mock-server.js'),
     proxy: {
       '/bi': {
-        target: 'http://localhost:38082', // target表示代理的服务器url
+        target: 'http://172.16.8.135:38082', // target表示代理的服务器url
         changeOrigin: true, // 开启代理，在本地创建一个虚拟服务端
         pathRewrite: {
           '^/bi': '/bi'

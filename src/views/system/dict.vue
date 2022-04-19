@@ -106,6 +106,7 @@ export default {
   },
   methods: {
     handleClick(index, row) {
+      console.log('-----------------------------触发了事件')
       console.log(index, row)
       this.dictCode = row.dictCode
     },
